@@ -59,7 +59,7 @@ describe("Database tests:", () => {
             description: "A selection of british cheese",
             rating: 5
         })
-        
+
         expect(userBoards[0]).toBeInstanceOf(Board);
         expect(userBoards[0].type).toBe("The English Cheesefast");
         expect(userBoards[0].description).toBe("A selection of british cheese");
@@ -67,7 +67,7 @@ describe("Database tests:", () => {
         expect(userBoards[0].id).toBe(1);
     })
 
-    test("Test to create a board with a cheese", async () => {
+    test("Test to create a board with cheese", async () => {
 
         const board = await Board.create({
             type: "The Mold Brothers",
