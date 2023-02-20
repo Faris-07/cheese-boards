@@ -2,10 +2,30 @@ const { sequelize } = require("../db")
 const { User, Board, Cheese } = require("../models/index")
 
 describe("Database tests:", () => {
-    beforeEach(async () => {
-        await sequelize.sync({force: true})
-    })
 
+    beforeAll(async () => {
+        // will run before any test
+        await sequelize.sync({ force: true });
+    });
+    
+    beforeEach(async () => {
+        // will run before each test
+        await sequelize.sync({ force: true });
+    });
+    
+    afterEach(async () => {
+        // will run after each test
+        await User.sync({ force: true });
+        await Board.sync({ force: true });
+        await Cheese.sync({ force: true });
+    });
+    
+    afterAll(async () => {
+        // will run before any test
+        await sequelize.drop()
+    });
+
+    
     test("Test to create a user", async () => {
 
         const user = await User.create({
@@ -47,7 +67,7 @@ describe("Database tests:", () => {
         expect(cheese.id).toBe(1);
     })
 
-    test("Test to create a user with a board", async () => {
+    test("Test to create a user with a cheese board and a cheese", async () => {
 
         const user = await User.create({
             name: "Gale",
@@ -60,29 +80,27 @@ describe("Database tests:", () => {
             rating: 5
         })
 
+        const cheese = await Cheese.create({
+            title: "Cheddar",
+            description: "A hard mild cheese"
+        })
+
+        await user.addBoard(board)
+        await board.addCheese(cheese)
+
+        const userBoards = await user.getBoards()
+
+        expect(userBoards[0].id).toBe(1);
         expect(userBoards[0]).toBeInstanceOf(Board);
         expect(userBoards[0].type).toBe("The English Cheesefast");
         expect(userBoards[0].description).toBe("A selection of british cheese");
         expect(userBoards[0].rating).toBe(5);
-        expect(userBoards[0].id).toBe(1);
-    })
+        
+        const boardCheeses = await userBoards[0].getCheeses()
 
-    test("Test to create a board with cheese", async () => {
-
-        const board = await Board.create({
-            type: "The Mold Brothers",
-            description: "A selection of moldy cheese",
-            rating: 3
-        })
-
-        const cheese = await Cheese.create({
-            title: "Blue Cheese",
-            description: "A moldy soft cheese"
-        })
-
-        expect(boardCheeses[0]).toBeInstanceOf(Cheese);
-        expect(boardCheeses[0].title).toBe("Blue Cheese");
-        expect(boardCheeses[0].description).toBe("A moldy soft cheese");
         expect(boardCheeses[0].id).toBe(1);
-    })
-})
+        expect(boardCheeses[0]).toBeInstanceOf(Cheese);
+        expect(boardCheeses[0].title).toBe("Cheddar");
+        expect(boardCheeses[0].description).toBe("A hard mild cheese");
+        })
+});
